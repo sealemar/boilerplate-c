@@ -1,0 +1,105 @@
+# Copyright [2013] [Sergey Markelov]
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# developed by Sergey Markelov (11/10/2013)
+#
+
+AR             := ar
+CC             := gcc
+
+# a specific implementation may either define $(INC) to prepend includes or
+# $(POST_INCLUDE) to append includes
+INC            += -I../lib -I../include -include common.h -include stddef.h -include stdint.h $(POST_INCLUDE)
+
+MACROS         += -D PARAM_CHECKS
+CC_c_FLAGS     := -O0 -g -std=c99 -ftrapv -Wall -Wextra -Werror
+CC_c           := $(CC) $(MACROS) $(INC) $(CC_c_FLAGS)
+SOURCES_DIRS   += .
+BUILD_DIR      := build
+
+# shouldn't be .
+OBJ_DIR        := $(BUILD_DIR)/obj
+BIN_DIR        := $(BUILD_DIR)/bin
+DEPS_DIR       := $(BUILD_DIR)/dep
+
+PROJECT_NAME   ?= project
+
+ETC_DIR        := ../etc
+SOURCES         = $(foreach srcdir,$(SOURCES_DIRS),$(wildcard $(if $(subst .,,$(srcdir)),$(srcdir)/,)*.c))
+OBJECTS         = $(addprefix $(OBJ_DIR)/,$(subst .c,.o,$(SOURCES)))
+DEPENDENCIES    = $(addprefix $(DEPS_DIR)/,$(subst .c,.d,$(SOURCES)))
+LIBS           += -lc -L../lib/$(BIN_DIR) -l$(PROJECT_NAME)
+CTAGS           = ctags --sort=yes --fields=+ilaS --extra=+q
+CTAGS_DIR      ?= ../include
+CTAGS_FILE     ?= ../etc/tags
+CTAGS_SOURCES   = $(CTAGS_DIR)/ctags.sources
+
+# set $(USE_GENERIC_CC) to 0 in Makefile from where this one is called to
+# get your own $(BIN_DIR)/$(PROG) recipe
+USE_GENERIC_CC ?= 1
+
+.PHONY: all clean ctags mkdirs
+.INTERMEDIATE: $(CTAGS_SOURCES)
+.SILENT: mkdirs
+
+all: $(BIN_DIR)/$(PROG)
+
+# see http://www.gnu.org/software/make/manual/html_node/Goals.html
+# $(MAKECMDGOALS) is an internal variable which is set to the list of the
+# goals specified on the command line
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),distclean)
+ifneq ($(MAKECMDGOALS),ctags)
+    # silent include - don't annoy if dependencies are not exist yet
+    -include $(DEPENDENCIES)
+endif
+endif
+endif
+
+$(DEPS_DIR)/%.d: %.c
+	$(CC_c) -M $(CPPFLAGS) $< | \
+	sed 's,\($(subst .c,.o,$(notdir $<))\)\s*:,$(OBJ_DIR)/$(if $(subst ./,,$(dir $<)),$(dir $<),)\1 $@ :,' > $@
+
+$(OBJ_DIR)/%.o: %.c
+	$(CC_c) -c -o $@ $<
+
+# this target may be overridden in Makefile from where this one is called
+# if $(USE_GENERIC_CC) is set to 0 there
+ifeq ($(USE_GENERIC_CC),1)
+$(BIN_DIR)/$(PROG): $(OBJECTS)
+	$(CC) -o $@ $(OBJECTS) $(LIBS)
+endif
+
+$(OBJECTS) $(DEPENDENCIES): | mkdirs
+
+mkdirs:
+	mkdir -p $(foreach srcdir,$(SOURCES_DIRS),$(if $(subst .,,$(srcdir)),$(addprefix $(OBJ_DIR)/,$(srcdir)),$(OBJ_DIR)))
+	mkdir -p $(foreach srcdir,$(SOURCES_DIRS),$(if $(subst .,,$(srcdir)),$(addprefix $(DEPS_DIR)/,$(srcdir)),$(DEPS_DIR)))
+	mkdir -p $(BIN_DIR)
+
+ctags: $(CTAGS_SOURCES)
+	$(CTAGS) --language-force=C --c-kinds=+px -f $(CTAGS_FILE) -L $<
+
+$(ETC_DIR):
+	mkdir -p ../etc
+
+$(CTAGS_SOURCES): | $(ETC_DIR)
+	@find $(CTAGS_DIR) -type f -name "*.[ch]" > $@
+
+clean:
+	rm -f $(OBJECTS) $(DEPENDENCIES) $(BIN_DIR)/$(PROG)
+
+distclean:
+	rm -f $(CTAGS_FILE)
+	rm -fr $(if $(subst .,,$(BUILD_DIR)),$(BUILD_DIR),$(OBJ_DIR) $(BIN_DIR) $(DEPS_DIR))
