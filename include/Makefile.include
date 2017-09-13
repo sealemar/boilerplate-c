@@ -22,15 +22,30 @@ CC             := gcc
 # $(POST_INCLUDE) to append includes
 INC            += -I../lib -I../include -include common.h -include stddef.h -include stdint.h $(POST_INCLUDE)
 
+CC_c_FLAGS     := -std=c99 -Wall -Wextra -Werror
+BUILD_SUBDIR   := .
+BUILD_DEBUG_SUBDIR := debug
+BUILD_RELEASE_SUBDIR := release
+
+ifeq ($(DEBUG),1)
+    CC_c_FLAGS += -O0 -g -ftrapv
+    BUILD_SUBDIR := $(BUILD_DEBUG_SUBDIR)
+else
+    CC_c_FLAGS += -O3
+    BUILD_SUBDIR := $(BUILD_RELEASE_SUBDIR)
+endif
+
 MACROS         += -D PARAM_CHECKS
-CC_c_FLAGS     := -O0 -g -std=c99 -ftrapv -Wall -Wextra -Werror
 CC_c           := $(CC) $(MACROS) $(INC) $(CC_c_FLAGS)
 SOURCES_DIRS   += .
 BUILD_DIR      := build
 
+MAKEFILE_PATH  := $(abspath $(firstword $(MAKEFILE_LIST)))
+PROJECT_DIR    := $(dir $(MAKEFILE_PATH))
+
 # shouldn't be .
-OBJ_DIR        := $(BUILD_DIR)/obj
-BIN_DIR        := $(BUILD_DIR)/bin
+OBJ_DIR        := $(BUILD_DIR)/$(BUILD_SUBDIR)/obj
+BIN_DIR        := $(BUILD_DIR)/$(BUILD_SUBDIR)/bin
 DEPS_DIR       := $(BUILD_DIR)/dep
 
 ETC_DIR        := ../etc
@@ -47,7 +62,7 @@ CTAGS_SOURCES   = $(CTAGS_DIR)/ctags.sources
 # get your own $(BIN_DIR)/$(PROG) recipe
 USE_GENERIC_CC ?= 1
 
-.PHONY: all clean ctags mkdirs
+.PHONY: all clean distclean mostlyclean ctags mkdirs
 .INTERMEDIATE: $(CTAGS_SOURCES)
 .SILENT: mkdirs
 
@@ -57,10 +72,12 @@ all: $(BIN_DIR)/$(PROG)
 # $(MAKECMDGOALS) is an internal variable which is set to the list of the
 # goals specified on the command line
 ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),mostlyclean)
 ifneq ($(MAKECMDGOALS),distclean)
 ifneq ($(MAKECMDGOALS),ctags)
-    # silent include - don't annoy if dependencies are not exist yet
+    # silent include - don't warn if dependencies haven't been created yet
     -include $(DEPENDENCIES)
+endif
 endif
 endif
 endif
@@ -77,6 +94,8 @@ $(OBJ_DIR)/%.o: %.c
 ifeq ($(USE_GENERIC_CC),1)
 $(BIN_DIR)/$(PROG): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LIBS)
+	@echo "----------"
+	@echo "Built $(PROJECT_DIR)$(BIN_DIR)/$(PROG)"
 endif
 
 $(OBJECTS) $(DEPENDENCIES): | mkdirs
@@ -95,8 +114,13 @@ $(ETC_DIR):
 $(CTAGS_SOURCES): | $(ETC_DIR)
 	@find $(CTAGS_DIR) -type f -name "*.[ch]" > $@
 
+mostlyclean:
+	-find $(BUILD_DIR) -name '*.[od]' -delete
+	@#rm -f $(OBJECTS) $(DEPENDENCIES)
+
 clean:
-	rm -f $(OBJECTS) $(DEPENDENCIES) $(BIN_DIR)/$(PROG)
+	-find $(BUILD_DIR) -type f -delete
+	@#rm -f $(OBJECTS) $(DEPENDENCIES) $(BIN_DIR)/$(PROG)
 
 distclean:
 	rm -f $(CTAGS_FILE)

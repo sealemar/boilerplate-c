@@ -19,6 +19,8 @@ include ../include/Makefile.project
 
 .PHONY: lib
 
+DEBUG        := 1
+TEST         := 1
 INC          := -include errno.h
 POST_INCLUDE := -include logger.h -include test_ut/test_ut.h
 SOURCES_DIRS  = test_ut
@@ -31,4 +33,4 @@ include ../include/Makefile.include
 $(BIN_DIR)/$(PROG): lib
 
 lib:
-	make -C ../lib
+	make -C ../lib DEBUG=$(DEBUG) TEST=$(TEST)

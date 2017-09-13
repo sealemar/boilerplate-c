@@ -15,30 +15,35 @@
 # developed by Sergey Markelov (11/10/2013)
 #
 
-.PHONY: all project check clean ctags distclean
+.PHONY: all project check test clean distclean mostlyclean ctags
 
 all: project
+
+project-debug:
+	make -C project DEBUG=1
 
 project:
 	make -C project
 
-check:
-	make -C test && test/build/bin/tests
+test check:
+	make -C test && test/build/debug/bin/tests
 
 ctags:
-	make -C include -f Makefile.include ctags
 	make -C project ctags
 	make -C test ctags
 	make -C lib ctags
+
+mostlyclean:
+	make -C project mostlyclean
+	make -C test mostlyclean
+	make -C lib mostlyclean
 
 clean:
 	make -C project clean
 	make -C test clean
 	make -C lib clean
-	make -C include -f Makefile.include clean
 
 distclean:
 	make -C project distclean
 	make -C test distclean
 	make -C lib distclean
-	make -C include -f Makefile.include distclean

@@ -15,6 +15,8 @@
 # developed by Sergey Markelov (11/10/2013)
 #
 
+# call with DEBUG=1 to make 'debug', otherwise 'release' is made
+
 include ../include/Makefile.project
 
 # for localtime_r() on Linux
