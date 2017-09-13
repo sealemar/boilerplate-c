@@ -33,8 +33,6 @@ OBJ_DIR        := $(BUILD_DIR)/obj
 BIN_DIR        := $(BUILD_DIR)/bin
 DEPS_DIR       := $(BUILD_DIR)/dep
 
-PROJECT_NAME   ?= project
-
 ETC_DIR        := ../etc
 SOURCES         = $(foreach srcdir,$(SOURCES_DIRS),$(wildcard $(if $(subst .,,$(srcdir)),$(srcdir)/,)*.c))
 OBJECTS         = $(addprefix $(OBJ_DIR)/,$(subst .c,.o,$(SOURCES)))

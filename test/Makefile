@@ -15,6 +15,8 @@
 # developed by Sergey Markelov (11/10/2013)
 #
 
+include ../include/Makefile.project
+
 .PHONY: lib
 
 INC          := -include errno.h

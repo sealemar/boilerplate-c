@@ -1,0 +1,2 @@
+PROJECT_NAME     := boilerplate
+PROJECT_LIB_NAME := lib$(PROJECT_NAME).a

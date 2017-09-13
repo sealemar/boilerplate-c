@@ -15,10 +15,11 @@
 # developed by Sergey Markelov (11/10/2013)
 #
 
+include ../include/Makefile.project
+
 # for localtime_r() on Linux
 MACROS      := -D _BSD_SOURCE
 
-PROJECT_NAME ?= project
 PROG        := $(PROJECT_NAME)
 #LIBS         = -lncurses
 CTAGS_FILE  := ../etc/project.tags

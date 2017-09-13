@@ -15,8 +15,7 @@
 # developed by Sergey Markelov (11/10/2013)
 #
 
-PROJECT_NAME     ?= project
-PROJECT_LIB_NAME ?= lib$(PROJECT_NAME).a
+include ../include/Makefile.project
 
 PROG           := $(PROJECT_LIB_NAME)
 CTAGS_FILE     := ../etc/lib.tags

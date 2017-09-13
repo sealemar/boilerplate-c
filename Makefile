@@ -15,9 +15,6 @@
 # developed by Sergey Markelov (11/10/2013)
 #
 
-PROJECT_NAME       := boilerplate
-PROJECT_LIB_NAME   := lib$(PROJECT_NAME).a
-
 .PHONY: all project check clean ctags distclean
 
 all: project
