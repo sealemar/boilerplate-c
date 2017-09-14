@@ -33,4 +33,4 @@ include ../include/Makefile.include
 $(BIN_DIR)/$(PROG): lib
 
 lib:
-	make -C ../lib DEBUG=$(DEBUG) TEST=$(TEST)
+	$(MAKE) -C ../lib DEBUG=$(DEBUG) TEST=$(TEST)

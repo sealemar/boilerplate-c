@@ -20,36 +20,36 @@
 all: project
 
 project-dbg:
-	make -C project dbg
+	$(MAKE) -C project dbg
 
 project-debug:
-	make -C project DEBUG=1
+	$(MAKE) -C project DEBUG=1
 
 project:
-	make -C project
+	$(MAKE) -C project
 
 test check:
-	make -C test && test/build/debug/bin/tests
+	$(MAKE) -C test && test/build/debug/bin/tests
 
 test-dbg check-dbg:
-	make -C test dbg
+	$(MAKE) -C test dbg
 
 ctags:
-	make -C project ctags
-	make -C test ctags
-	make -C lib ctags
+	$(MAKE) -C project ctags
+	$(MAKE) -C test ctags
+	$(MAKE) -C lib ctags
 
 mostlyclean:
-	make -C project mostlyclean
-	make -C test mostlyclean
-	make -C lib mostlyclean
+	$(MAKE) -C project mostlyclean
+	$(MAKE) -C test mostlyclean
+	$(MAKE) -C lib mostlyclean
 
 clean:
-	make -C project clean
-	make -C test clean
-	make -C lib clean
+	$(MAKE) -C project clean
+	$(MAKE) -C test clean
+	$(MAKE) -C lib clean
 
 distclean:
-	make -C project distclean
-	make -C test distclean
-	make -C lib distclean
+	$(MAKE) -C project distclean
+	$(MAKE) -C test distclean
+	$(MAKE) -C lib distclean
