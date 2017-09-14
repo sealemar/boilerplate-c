@@ -15,9 +15,12 @@
 # developed by Sergey Markelov (11/10/2013)
 #
 
-.PHONY: all project check test clean distclean mostlyclean ctags
+.PHONY: all project project-dbg project-debug check test check-dbg test-dbg clean distclean mostlyclean ctags
 
 all: project
+
+project-dbg:
+	make -C project dbg
 
 project-debug:
 	make -C project DEBUG=1
@@ -27,6 +30,9 @@ project:
 
 test check:
 	make -C test && test/build/debug/bin/tests
+
+test-dbg check-dbg:
+	make -C test dbg
 
 ctags:
 	make -C project ctags

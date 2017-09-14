@@ -17,6 +17,7 @@
 
 AR             := ar
 CC             := gcc
+DBG            := lldb
 
 # a specific implementation may either define $(INC) to prepend includes or
 # $(POST_INCLUDE) to append includes
@@ -27,6 +28,9 @@ BUILD_SUBDIR   := .
 BUILD_DEBUG_SUBDIR := debug
 BUILD_RELEASE_SUBDIR := release
 
+# CC_c_FLAGS     += $(if $(findstring 1,$(DEBUG)),-O0 -g -ftrapv,-O3)
+# BUILD_SUBDIR    = $(if $(findstring 1,$(DEBUG)),$(BUILD_DEBUG_SUBDIR),$(BUILD_RELEASE_SUBDIR))
+#
 ifeq ($(DEBUG),1)
     CC_c_FLAGS += -O0 -g -ftrapv
     BUILD_SUBDIR := $(BUILD_DEBUG_SUBDIR)
@@ -62,7 +66,7 @@ CTAGS_SOURCES   = $(CTAGS_DIR)/ctags.sources
 # get your own $(BIN_DIR)/$(PROG) recipe
 USE_GENERIC_CC ?= 1
 
-.PHONY: all clean distclean mostlyclean ctags mkdirs
+.PHONY: all clean distclean mostlyclean ctags mkdirs dbg
 .INTERMEDIATE: $(CTAGS_SOURCES)
 .SILENT: mkdirs
 
@@ -92,10 +96,23 @@ $(OBJ_DIR)/%.o: %.c
 # this target may be overridden in Makefile from where this one is called
 # if $(USE_GENERIC_CC) is set to 0 there
 ifeq ($(USE_GENERIC_CC),1)
+
 $(BIN_DIR)/$(PROG): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LIBS)
 	@echo "----------"
 	@echo "Built $(PROJECT_DIR)$(BIN_DIR)/$(PROG)"
+
+ifeq ($(DEBUG),1)
+
+dbg: $(BIN_DIR)/$(PROG)
+	$(DBG) $(BIN_DIR)/$(PROG)
+
+else
+
+dbg:
+	$(MAKE) dbg DEBUG=1
+
+endif
 endif
 
 $(OBJECTS) $(DEPENDENCIES): | mkdirs
