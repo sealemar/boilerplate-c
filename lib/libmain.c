@@ -1,4 +1,4 @@
-// Copyright [2013] [Sergey Markelov]
+// Copyright [2017] [Sergey Markelov]
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// developed by Sergey Markelov (11/10/2013)
+// developed by Sergey Markelov (09/14/2017)
 
 int libmain_add(int a, int b) {
     return a + b;

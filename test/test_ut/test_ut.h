@@ -1,4 +1,4 @@
-// Copyright [2013] [Sergey Markelov]
+// Copyright [2017] [Sergey Markelov]
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// @brief BinaryClock TestUT framework
+// @brief TestUT framework
 //
-// developed by Sergey Markelov (11/15/2013)
+// developed by Sergey Markelov (09/14/2017)
 //
 
-#ifndef BINARY_CLOCK_TEST_UT_H
-#define BINARY_CLOCK_TEST_UT_H
+#ifndef TEST_UT_H
+#define TEST_UT_H
 
 //
 // @brief TestUnit stucture describes a test unit, a test function in other words
