@@ -2,7 +2,7 @@
 
 #include "logger.h"
 
-#define BACKTICK_STR_BUFFER_SIZE 50
+#define BACKTICK_STR_BUFFER_SIZE 256
 
 const char* LogLevelStr[LL_ERROR + 1] = {
     " DEBUG ",
@@ -44,7 +44,7 @@ void logger_stream(void *data, enum LogLevel logLevel, const char* file, int lin
 
                 if(index < countof(dt->backtics) && dt->backtics[index]) {
                     char str[BACKTICK_STR_BUFFER_SIZE] = {0};
-                    int res = dt->backtics[index](str, countof(str));
+                    int res = dt->backtics[index](data, str, countof(str));
                     if(res) {
                         fprintf(stream, "~ backtick %zu failed with %d ~", index, res);
                     } else {

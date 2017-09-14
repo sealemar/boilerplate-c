@@ -21,19 +21,10 @@
 #include <libmain.h>
 
 #include <logger.h>
-
-#include "logger_backticks.h"
-
-// For logger.h
-// FILE *errStream;
-// FILE *outStream;
+#include <logger_backticks.h>
 
 int main()
 {
-//     errStream = stderr;
-//     outStream = stdout;
-//
-
     struct logger_streamData loggerData = {
         .errStream = stderr,
         .outStream = stdout,
@@ -45,13 +36,12 @@ int main()
     __logData = &loggerData;
     __logFunc = logger_stream;
 
-    mlog(LL_INFO, "start");
+    LogInfo("start");
 
-    //Call(emulator_init());
     int result = libmain_add(5, 6);
-    mlog(LL_DEBUG, "a + b = %d", result);
+    LogDebug("a + b = %d", result);
 
-    mlog(LL_INFO, "end");
+    LogInfo("end");
 
     return 0;
 }

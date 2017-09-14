@@ -28,49 +28,69 @@ extern const char* LogLevelStr[LL_ERROR + 1];
 extern void *__logData;
 extern void (*__logFunc)(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...);
 
-#define LOGGER_STREAM_BACKTICS_SIZE 10
+#define LOGGER_BACKTICKS_SIZE 10
 
+//
+// @brief data structure for @see logger_stream
+//
+// @param errStream error stream, like stderr
+// @param outStream output stream, like stdout
+// @param logLevel anything below will be ignored
+//
+// @param format a format string, where
+//      %m - log message
+//      %L - log level (as passed to __logFunc function)
+//      %F - file name, which emitted the message
+//      %l - line in the file
+//      %f - function name
+//      %0 .. %9 - backtick[n]
+//
+//      anything else is written to the output unchanged, except for every first percent.
+//
+//      @example
+//
+//      "%%[%L] %0 - %F:%l (%f) - %m"
+//      "%[LOG_LEVEL] backtick[0]() - filename:line (function) - message"
+//
+// @param backtics a collection of backtick functions
+//      backtick function should populate outStr, which is written out
+//
+//      backtick function prototype is
+//
+//      int backtick(struct logger_streamData *logData, char *outStr, size_t sz);
+//
+//      where
+//          @c logData - is logger_streamData
+//          @c outStr  - output string where the result should be stored
+//          @c sz      - size of the output buffer
+//
 struct logger_streamData {
     FILE          *errStream;
     FILE          *outStream;
     enum LogLevel  logLevel;
     const char    *format;
-    int (*backtics[LOGGER_STREAM_BACKTICS_SIZE])(char *outStr, size_t len);
+    int (*backtics[LOGGER_BACKTICKS_SIZE])(struct logger_streamData *logData, char *outStr, size_t sz);
 };
 
 void logger_stream(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...);
 
-extern FILE *errStream;
-extern FILE *outStream;
-
-#define ERR_STREAM              errStream
-#define OUT_STREAM              outStream
-
 #define ERROR_PREFIX            "Error: "
-#define STANDARD_PREFIX         ""
 #define ERROR_CONTINUE_PREFIX   " ----> "
 
-#define LogRaw(stream, format, ...) \
-    { fprintf(stream, format, ##__VA_ARGS__); }
-
-#define LogLnRaw(stream, format, ...) \
-    { fprintf(stream, format "\n", ##__VA_ARGS__); }
-
-#define _LOG(stream, prefix, format, ...) \
-    { fprintf(stream, "%s (%s) - " format "\n", prefix __FILE__ ":" TOSTRING(__LINE__), __func__, ##__VA_ARGS__); }
-
-#define LogError(format, ...) \
-    { _LOG(ERR_STREAM, ERROR_PREFIX, format, ##__VA_ARGS__); }
-
-#define Log(format, ...) \
-    { _LOG(OUT_STREAM, STANDARD_PREFIX, format, ##__VA_ARGS__); }
-
-#define mlog(logLevel, format, ...) \
+#define Log(logLevel, format, ...) \
     { if(__logFunc) { __logFunc(__logData, logLevel, __FILE__, __LINE__, __func__, format, ##__VA_ARGS__); } }
+
+#define LogDebug(format, ...)   { Log(LL_DEBUG,   format, ##__VA_ARGS__); }
+#define LogInfo(format, ...)    { Log(LL_INFO,    format, ##__VA_ARGS__); }
+#define LogWarning(format, ...) { Log(LL_WARNING, format, ##__VA_ARGS__); }
+#define LogError(format, ...)   { Log(LL_ERROR,   format, ##__VA_ARGS__); }
+
+#define LogErrorExInit(format, ...)     { LogError( "%s" format, ERROR_PREFIX,          ##__VA_ARGS__ ); }
+#define LogErrorExContinue(format, ...) { LogError( "%s" format, ERROR_CONTINUE_PREFIX, ##__VA_ARGS__ ); }
 
 //
 // @brief this macro originates the error. Functions down the stack should use
-//        ContinueErrorEx() or ContinueError() to propagate the error behavior.
+//        @see ContinueErrorEx() or @see ContinueError() to propagate the error.
 //
 //        In the log it will look like:
 //
@@ -84,40 +104,36 @@ extern FILE *outStream;
 // @param format, ... - custom formatted message
 //
 #define OriginateErrorEx(result, resultSpecifier, format, ...) \
-    { LogError("[" resultSpecifier "] " format, result, ##__VA_ARGS__); return result; }
+    { LogErrorExInit("[" resultSpecifier "] " format, result, ##__VA_ARGS__); return result; }
 
 //
 // @see OriginateErrorEx
 //
 #define OriginateError(result, resultSpecifier) \
-    { LogError("[" resultSpecifier "] ", result); return result; }
+    { LogErrorExInit("[" resultSpecifier "] ", result); return result; }
 
 //
 // @see OriginateErrorEx
 //
 #define ContinueErrorEx(result, resultSpecifier, format, ...) \
-    { _LOG(ERR_STREAM, ERROR_CONTINUE_PREFIX, \
-           "[" resultSpecifier "] " format, result, ##__VA_ARGS__); return result; }
+    { LogErrorExContinue( "[" resultSpecifier "] " format, result, ##__VA_ARGS__ ); return result; }
 
 //
 // @see OriginateErrorEx
 //
 #define ContinueError(result, resultSpecifier) \
-    { _LOG(ERR_STREAM, ERROR_CONTINUE_PREFIX, \
-           "[" resultSpecifier "] ", result); return result; }
+    { LogErrorExContinue( "[" resultSpecifier "] ", result ); return result; }
 
 //
-// @brief operates the same to ContinueErrorEx, but doesn't return
+// @brief operates the same as @see ContinueErrorEx, but doesn't return
 //
 #define IgnoreErrorEx(result, resultSpecifier, format, ...) \
-    { _LOG(ERR_STREAM, ERROR_CONTINUE_PREFIX, \
-           "[" resultSpecifier "] " format, result, ##__VA_ARGS__); }
+    { LogErrorExContinue( "[" resultSpecifier "] " format, result, ##__VA_ARGS__); }
 
 //
-// @brief operates the same to ContinueError, but doesn't return
+// @brief operates the same as @see ContinueError, but doesn't return
 //
 #define IgnoreError(result, resultSpecifier) \
-    { _LOG(ERR_STREAM, ERROR_CONTINUE_PREFIX, \
-           "[" resultSpecifier "] ", result); }
+    { LogErrorExContinue( "[" resultSpecifier "] ", result); }
 
 #endif

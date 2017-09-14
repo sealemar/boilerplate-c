@@ -16,6 +16,7 @@
 //
 // developed by Sergey Markelov (11/10/2013)
 //
+#include <logger_backticks.h>
 
 #include "ut_libmain.h"
 
@@ -28,8 +29,16 @@ static TestUnit testSuites[] = {
 
 int main()
 {
-    errStream = stderr;
-    outStream = stdout;
+    struct logger_streamData loggerData = {
+        .errStream = stderr,
+        .outStream = stdout,
+        .logLevel  = LL_DEBUG,
+        .format    = "[%L] %0 - %F:%l (%f) - %m",
+        .backtics  = { logger_backtick_time }
+    };
+
+    __logData = &loggerData;
+    __logFunc = logger_stream;
 
     return runTestSuite(testSuites);
 }

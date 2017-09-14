@@ -27,7 +27,7 @@ static int test_limain_add_correct()
     int result = libmain_add(a, b);
 
     assert_int(result, a + b);
-//    assert_int(result, a + b + 1);
+//     assert_int(result, a + b + 1);
 
     return 0;
 }

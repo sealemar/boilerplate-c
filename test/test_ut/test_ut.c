@@ -24,30 +24,31 @@ int _runTestSuite(const char *fileName, unsigned long line, const char *func, Te
     NullCheck(fileName);
     NullCheck(func);
     NullCheck(testSuite);
-    if(testsCount == 0)
+    if(testsCount == 0) {
         OriginateErrorEx(EINVAL, "%d", "testsCount is 0");
+    }
 
-    LogLnRaw(OUT_STREAM, "--- %s:%lu (%s) - a test suite started ---", fileName, line, func);
+    LogInfo("--- %s:%lu (%s) - a test suite started ---", fileName, line, func);
 
     int errors = 0;
 
     for(size_t i = 0; i < testsCount; ++i) {
         TestUnit *unit = &testSuite[i];
-        LogLnRaw(OUT_STREAM, "Starting %s:%s --- [%s]", fileName, func, unit->functionName);
+        LogInfo("Starting %s:%s --- [%s]", fileName, func, unit->functionName);
         int res = unit->func();
         if(res) {
             IgnoreError(res, "%d");
             ++errors;
             unit->isFailed = TRUE;
-            LogLnRaw(ERR_STREAM, "");
         }
     }
 
-    LogLnRaw(OUT_STREAM,
-             "--- %s:%lu (%s) - a test suite completed --- "
-             "%zu test(s) ran. %zu succeded, %d failed",
-             fileName, line, func,
-             testsCount, testsCount - errors, errors);
+    LogInfo(
+        "--- %s:%lu (%s) - a test suite completed --- "
+        "%zu test(s) ran. %zu succeded, %d failed",
+        fileName, line, func,
+        testsCount, testsCount - errors, errors
+    );
 
     return errors;
 }
