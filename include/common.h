@@ -18,12 +18,12 @@
 // during compilation.
 //
 
-#ifndef BINARY_CLOCK_INCLUDE_COMMON_H
-#define BINARY_CLOCK_INCLUDE_COMMON_H
+#ifndef INCLUDE_COMMON_H
+#define INCLUDE_COMMON_H
 
 #define VERSION_MAJOR 1
 #define VERSION_MINOR 0
-#define VERSION_FIX   1
+#define VERSION_FIX   0
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x)  STRINGIFY(x)
