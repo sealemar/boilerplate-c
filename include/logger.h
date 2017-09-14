@@ -22,8 +22,20 @@
 
 #include <stdio.h>
 
-// TODO: think about initializing these variables, so that I don't have to add default
-//       initialization section everywhere
+enum LogLevel { LL_DEBUG = 0, LL_INFO, LL_WARNING, LL_ERROR };
+extern const char* LogLevelStr[LL_ERROR + 1];
+
+extern void *__logData;
+extern void (*__logFunc)(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...);
+
+struct logger_simpleData {
+    FILE *errStream;
+    FILE *outStream;
+    enum LogLevel logLevel;
+};
+
+void logger_simple(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...);
+
 extern FILE *errStream;
 extern FILE *outStream;
 
@@ -48,6 +60,9 @@ extern FILE *outStream;
 
 #define Log(format, ...) \
     { _LOG(OUT_STREAM, STANDARD_PREFIX, format, ##__VA_ARGS__); }
+
+#define mlog(logLevel, format, ...) \
+    { if(__logFunc) { __logFunc(__logData, logLevel, __FILE__, __LINE__, __func__, format, ##__VA_ARGS__); } }
 
 //
 // @brief this macro originates the error. Functions down the stack should use

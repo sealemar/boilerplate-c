@@ -23,17 +23,21 @@
 #include <logger.h>
 
 // For logger.h
-FILE *errStream;
-FILE *outStream;
+// FILE *errStream;
+// FILE *outStream;
 
 int main()
 {
-    errStream = stderr;
-    outStream = stdout;
+//     errStream = stderr;
+//     outStream = stdout;
+
+    struct logger_simpleData loggerData = { .errStream = stderr, .outStream = stdout, .logLevel = LL_DEBUG };
+    __logData = &loggerData;
+    __logFunc = logger_simple;
 
     //Call(emulator_init());
     int result = libmain_add(5, 6);
-    Log("a + b = %d", result);
+    mlog(LL_INFO, "a + b = %d", result);
 
     return 0;
 }

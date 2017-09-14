@@ -1,6 +1,4 @@
-dep/
-obj/
-bin/
+build/
 
 /etc/
 

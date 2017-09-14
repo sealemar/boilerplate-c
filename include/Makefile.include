@@ -41,7 +41,7 @@ endif
 
 MACROS         += -D PARAM_CHECKS
 CC_c           := $(CC) $(MACROS) $(INC) $(CC_c_FLAGS)
-SOURCES_DIRS   += .
+SOURCES_DIRS   += . ../include
 BUILD_DIR      := build
 
 MAKEFILE_PATH  := $(abspath $(firstword $(MAKEFILE_LIST)))
