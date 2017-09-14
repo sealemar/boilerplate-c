@@ -28,13 +28,17 @@ extern const char* LogLevelStr[LL_ERROR + 1];
 extern void *__logData;
 extern void (*__logFunc)(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...);
 
-struct logger_simpleData {
-    FILE *errStream;
-    FILE *outStream;
-    enum LogLevel logLevel;
+#define LOGGER_STREAM_BACKTICS_SIZE 10
+
+struct logger_streamData {
+    FILE          *errStream;
+    FILE          *outStream;
+    enum LogLevel  logLevel;
+    const char    *format;
+    int (*backtics[LOGGER_STREAM_BACKTICS_SIZE])(char *outStr, size_t len);
 };
 
-void logger_simple(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...);
+void logger_stream(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...);
 
 extern FILE *errStream;
 extern FILE *outStream;

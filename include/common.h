@@ -48,6 +48,19 @@ typedef enum { FALSE = 0, TRUE } Bool;
 #endif
 
 //
+// CallNE = Call No Error = Call and don't log error
+// @brief Calls function and returns the result if the result is non-zero
+//
+#ifdef PARAM_CHECKS
+#define CallNE(function) { \
+    int _res = function; \
+    if(_res) return _res; \
+}
+#else
+#define CallNE(function) { (void)function; }
+#endif
+
+//
 // @brief CallEx(function) is the same to Call(function), but if
 //        the function fails, it calls
 //        ContinueErrorEx(functionResult, "%d", format, ...)
