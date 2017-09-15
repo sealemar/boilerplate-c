@@ -15,4 +15,20 @@
 # developed by Sergey Markelov (09/14/2017)
 #
 
-PROJECT_NAME := boilerplate
+ETC_DIR        := ../etc
+CTAGS           = ctags --sort=yes --fields=+ilaS --extra=+q
+CTAGS_DIR      ?= ../include
+CTAGS_FILE     ?= ../etc/tags
+CTAGS_SOURCES   = $(CTAGS_DIR)/ctags.sources
+
+.PHONY: ctags
+.INTERMEDIATE: $(CTAGS_SOURCES)
+
+ctags: $(CTAGS_SOURCES)
+	$(CTAGS) --language-force=C --c-kinds=+px -f $(CTAGS_FILE) -L $<
+
+$(ETC_DIR):
+	mkdir -p ../etc
+
+$(CTAGS_SOURCES): | $(ETC_DIR)
+	@find $(CTAGS_DIR) -type f -name "*.[ch]" > $@

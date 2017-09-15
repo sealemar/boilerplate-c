@@ -18,10 +18,10 @@
 //
 
 #include <stdlib.h>
-#include <libmain.h>
+#include <main/libmain.h>
 
-#include <logger.h>
-#include <logger_backticks.h>
+#include <logger/logger.h>
+#include <logger/logger_backticks.h>
 
 int main()
 {

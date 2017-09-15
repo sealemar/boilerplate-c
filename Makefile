@@ -53,3 +53,4 @@ distclean:
 	$(MAKE) -C project distclean
 	$(MAKE) -C test distclean
 	$(MAKE) -C lib distclean
+	rm -f etc/*tags

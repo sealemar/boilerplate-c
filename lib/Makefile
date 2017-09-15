@@ -17,12 +17,40 @@
 
 include ../include/Makefile.project
 
-PROG           := $(PROJECT_LIB_NAME)
 CTAGS_FILE     := ../etc/lib.tags
 CTAGS_DIR      := ../lib
+
+ifndef MAKELIB
+
+all:
+	$(MAKE) DEBUG=$(DEBUG) MAKELIB=logger
+	$(MAKE) DEBUG=$(DEBUG) MAKELIB=main
+
+mostlyclean:
+	$(MAKE) mostlyclean MAKELIB=logger
+	$(MAKE) mostlyclean MAKELIB=main
+
+clean:
+	$(MAKE) clean MAKELIB=logger
+	$(MAKE) clean MAKELIB=main
+
+distclean:
+	$(MAKE) distclean MAKELIB=logger
+	$(MAKE) distclean MAKELIB=main
+
+include ../include/Makefile.postinclude
+
+else
+
+PROG           := lib$(MAKELIB).a
+SOURCE_DIRS_EXCLUDE_DOT := 1
+SOURCES_DIRS   := $(MAKELIB)
+BUILD_DIR      := $(MAKELIB)/build
 USE_GENERIC_CC := 0
 
 include ../include/Makefile.include
 
 $(BIN_DIR)/$(PROG): $(OBJECTS)
 	$(AR) rvs $@ $?
+
+endif

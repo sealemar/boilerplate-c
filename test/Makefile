@@ -22,7 +22,7 @@ include ../include/Makefile.project
 DEBUG        := 1
 TEST         := 1
 INC          := -include errno.h
-POST_INCLUDE := -include logger.h -include test_ut/test_ut.h
+POST_INCLUDE := -include logger/logger.h -include test_ut/test_ut.h
 SOURCES_DIRS  = test_ut
 PROG         := tests
 CTAGS_FILE   := ../etc/test.tags

@@ -48,7 +48,7 @@ endfunction
 
 execute "autocmd BufEnter " . s:projectDir . "/project/*.[ch] call <SID>initC('project')"
 execute "autocmd BufEnter " . s:projectDir . "/test/*.[ch] call <SID>initC('test')"
-execute "autocmd BufEnter " . s:projectDir . "/lib/*.[ch] call <SID>initC('lib')"
+execute "autocmd BufEnter " . s:projectDir . "/lib/*/*.[ch] call <SID>initC('lib')"
 execute "autocmd BufEnter " . s:projectDir . "/include/*.[ch] call <SID>initC('')"
 
 "
@@ -56,7 +56,7 @@ execute "autocmd BufEnter " . s:projectDir . "/include/*.[ch] call <SID>initC(''
 "
 execute "autocmd BufWritePost " . s:projectDir . "/project/*.[ch] Silent make -C " . s:projectDir . "/project ctags"
 execute "autocmd BufWritePost " . s:projectDir . "/test/*.[ch] Silent make -C " . s:projectDir . "/test ctags"
-execute "autocmd BufWritePost " . s:projectDir . "/lib/*.[ch] Silent make -C " . s:projectDir . "/lib ctags"
+execute "autocmd BufWritePost " . s:projectDir . "/lib/*/*.[ch] Silent make -C " . s:projectDir . "/lib ctags"
 execute "autocmd BufWritePost " . s:projectDir . "/include/*.[ch] Silent make -C " . s:projectDir . "/include ctags"
 
 "

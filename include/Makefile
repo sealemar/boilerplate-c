@@ -15,4 +15,4 @@
 # developed by Sergey Markelov (09/14/2017)
 #
 
-PROJECT_NAME := boilerplate
+include ./Makefile.postinclude

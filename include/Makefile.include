@@ -41,8 +41,11 @@ endif
 
 MACROS         += -D PARAM_CHECKS
 CC_c           := $(CC) $(MACROS) $(INC) $(CC_c_FLAGS)
-SOURCES_DIRS   += . ../include
-BUILD_DIR      := build
+ifneq ($(SOURCE_DIRS_EXCLUDE_DOT),1)
+SOURCES_DIRS   += .
+endif
+SOURCES_DIRS   += ../include
+BUILD_DIR      ?= build
 
 MAKEFILE_PATH  := $(abspath $(firstword $(MAKEFILE_LIST)))
 PROJECT_DIR    := $(dir $(MAKEFILE_PATH))
@@ -52,22 +55,17 @@ OBJ_DIR        := $(BUILD_DIR)/$(BUILD_SUBDIR)/obj
 BIN_DIR        := $(BUILD_DIR)/$(BUILD_SUBDIR)/bin
 DEPS_DIR       := $(BUILD_DIR)/dep
 
-ETC_DIR        := ../etc
 SOURCES         = $(foreach srcdir,$(SOURCES_DIRS),$(wildcard $(if $(subst .,,$(srcdir)),$(srcdir)/,)*.c))
 OBJECTS         = $(addprefix $(OBJ_DIR)/,$(subst .c,.o,$(SOURCES)))
 DEPENDENCIES    = $(addprefix $(DEPS_DIR)/,$(subst .c,.d,$(SOURCES)))
-LIBS           += -lc -L../lib/$(BIN_DIR) -l$(PROJECT_NAME)
-CTAGS           = ctags --sort=yes --fields=+ilaS --extra=+q
-CTAGS_DIR      ?= ../include
-CTAGS_FILE     ?= ../etc/tags
-CTAGS_SOURCES   = $(CTAGS_DIR)/ctags.sources
+LIB_NAMES      := ${shell find ../lib -type d -d 1 -exec basename '{}' \;}
+LIBS           += -lc $(foreach lib,$(LIB_NAMES),-L../lib/$(lib)/$(BIN_DIR) -l$(lib))
 
 # set $(USE_GENERIC_CC) to 0 in Makefile from where this one is called to
 # get your own $(BIN_DIR)/$(PROG) recipe
 USE_GENERIC_CC ?= 1
 
-.PHONY: all clean distclean mostlyclean ctags mkdirs dbg
-.INTERMEDIATE: $(CTAGS_SOURCES)
+.PHONY: all clean distclean mostlyclean mkdirs dbg
 .SILENT: mkdirs
 
 all: $(BIN_DIR)/$(PROG)
@@ -122,15 +120,6 @@ mkdirs:
 	mkdir -p $(foreach srcdir,$(SOURCES_DIRS),$(if $(subst .,,$(srcdir)),$(addprefix $(DEPS_DIR)/,$(srcdir)),$(DEPS_DIR)))
 	mkdir -p $(BIN_DIR)
 
-ctags: $(CTAGS_SOURCES)
-	$(CTAGS) --language-force=C --c-kinds=+px -f $(CTAGS_FILE) -L $<
-
-$(ETC_DIR):
-	mkdir -p ../etc
-
-$(CTAGS_SOURCES): | $(ETC_DIR)
-	@find $(CTAGS_DIR) -type f -name "*.[ch]" > $@
-
 mostlyclean:
 	-find $(BUILD_DIR) -name '*.[od]' -delete
 	@#rm -f $(OBJECTS) $(DEPENDENCIES)
@@ -142,3 +131,5 @@ clean:
 distclean:
 	rm -f $(CTAGS_FILE)
 	rm -fr $(if $(subst .,,$(BUILD_DIR)),$(BUILD_DIR),$(OBJ_DIR) $(BIN_DIR) $(DEPS_DIR))
+
+include ../include/Makefile.postinclude

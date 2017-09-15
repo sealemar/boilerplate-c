@@ -20,7 +20,7 @@
 #ifndef LOGGER_BACKTICS_H
 #define LOGGER_BACKTICS_H
 
-#include <logger.h>
+#include "logger.h"
 
 #ifdef __cplusplus
 extern "C" {
