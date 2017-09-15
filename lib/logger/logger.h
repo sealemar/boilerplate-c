@@ -21,12 +21,15 @@
 #define GENERIC_LOGGER
 
 #include <stdio.h>
+#include <stdarg.h>
 
 enum LogLevel { LL_DEBUG = 0, LL_INFO, LL_WARNING, LL_ERROR };
 extern const char* LogLevelStr[LL_ERROR + 1];
 
 extern void *__logData;
-extern void (*__logFunc)(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...);
+extern void (*__vlogFunc)(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
+
+void logger_log(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...);
 
 #define LOGGER_BACKTICKS_SIZE 10
 
@@ -39,7 +42,7 @@ extern void (*__logFunc)(void *data, enum LogLevel logLevel, const char* file, i
 //
 // @param format a format string, where
 //      %m - log message
-//      %L - log level (as passed to __logFunc function)
+//      %L - log level (as passed to __vlogFunc function)
 //      %F - file name, which emitted the message
 //      %l - line in the file
 //      %f - function name
@@ -65,20 +68,25 @@ extern void (*__logFunc)(void *data, enum LogLevel logLevel, const char* file, i
 //          @c sz      - size of the output buffer
 //
 struct logger_streamData {
+    enum LogLevel  logLevel;
     FILE          *errStream;
     FILE          *outStream;
-    enum LogLevel  logLevel;
     const char    *format;
     int (*backtics[LOGGER_BACKTICKS_SIZE])(struct logger_streamData *logData, char *outStr, size_t sz);
 };
 
-void logger_stream(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...);
+void logger_vstream(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
+
+#define logger_installStream(pdata) { \
+    __vlogFunc = logger_vstream; \
+    __logData  = pdata; \
+}
 
 #define ERROR_PREFIX            "Error: "
 #define ERROR_CONTINUE_PREFIX   " ----> "
 
 #define Log(logLevel, format, ...) \
-    { if(__logFunc) { __logFunc(__logData, logLevel, __FILE__, __LINE__, __func__, format, ##__VA_ARGS__); } }
+    { if(__vlogFunc) { logger_log(__logData, logLevel, __FILE__, __LINE__, __func__, format, ##__VA_ARGS__); } }
 
 #define LogDebug(format, ...)   { Log(LL_DEBUG,   format, ##__VA_ARGS__); }
 #define LogInfo(format, ...)    { Log(LL_INFO,    format, ##__VA_ARGS__); }

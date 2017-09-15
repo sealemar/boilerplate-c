@@ -38,8 +38,7 @@ int main()
         .backtics  = { logger_backtick_time }
     };
 
-    __logData = &loggerData;
-    __logFunc = logger_stream;
+    logger_installStream(&loggerData);
 
     return runTestSuite(testSuites);
 }

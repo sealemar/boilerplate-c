@@ -31,9 +31,21 @@ const char* LogLevelStr[LL_ERROR + 1] = {
 };
 
 void *__logData = NULL;
-void (*__logFunc)(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...) = NULL;
+void (*__vlogFunc)(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp) = NULL;
 
-void logger_stream(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...) {
+void logger_log(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...) {
+#ifdef PARAM_CHECKS
+    if(__vlogFunc == NULL) {
+        return;
+    }
+#endif
+    va_list argp;
+    va_start(argp, format);
+    __vlogFunc(data, logLevel, file, line, func, format, argp);
+    va_end(argp);
+}
+
+void logger_vstream(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp) {
     struct logger_streamData *dt = data;
 
     if(logLevel < LL_DEBUG) {
@@ -74,13 +86,9 @@ void logger_stream(void *data, enum LogLevel logLevel, const char* file, int lin
                 }
             } else {
                 switch(ch) {
-                    case 'm': {
-                        va_list args;
-                        va_start(args, format);
-                        vfprintf(stream, format, args);
-                        va_end(args);
+                    case 'm':
+                        vfprintf(stream, format, argp);
                         break;
-                    }
                     case 'L':
                         fputs(LogLevelStr[logLevel], stream);
                         break;
