@@ -26,8 +26,13 @@
 enum LogLevel { LL_DEBUG = 0, LL_INFO, LL_WARNING, LL_ERROR };
 extern const char* LogLevelStr[LL_ERROR + 1];
 
-extern void *__logData;
-extern void (*__vlogFunc)(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
+typedef void (*VLogFunc)(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
+
+struct logger_prePostData;
+typedef int (*VLogFuncPrePost)(struct logger_prePostData *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
+
+extern void     *__logData;
+extern VLogFunc  __vlogFunc;
 
 void logger_log(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...);
 
@@ -75,12 +80,39 @@ struct logger_streamData {
     int (*backtics[LOGGER_BACKTICKS_SIZE])(struct logger_streamData *logData, char *outStr, size_t sz);
 };
 
-void logger_vstream(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
+struct logger_prePostData {
+    VLogFuncPrePost   preFunc;
+    VLogFuncPrePost   postFunc;
+    void             *loggerData;
+    VLogFunc          loggerFunc;
 
-#define logger_installStream(pdata) { \
-    __vlogFunc = logger_vstream; \
+    union {
+        char             cid;
+        unsigned char   ucid;
+        short            sid;
+        unsigned short  usid;
+        int              iid;
+        unsigned int    uiid;
+        long             lid;
+        unsigned long   ulid;
+        float            fid;
+        double           did;
+        char           strid[50];
+    } identifier;
+};
+
+void logger_vstream   (void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
+void logger_vprePost  (void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
+// void logger_vcomposite(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
+
+#define logger_install(pdata, logger_func) { \
+    __vlogFunc = logger_func; \
     __logData  = pdata; \
 }
+
+#define logger_installStream(pdata)    { logger_install(pdata, logger_vstream);    }
+#define logger_installPrePost(pdata)   { logger_install(pdata, logger_vprePost);   }
+#define logger_installComposite(pdata) { logger_install(pdata, logger_vcomposite); }
 
 #define ERROR_PREFIX            "Error: "
 #define ERROR_CONTINUE_PREFIX   " ----> "

@@ -30,8 +30,8 @@ const char* LogLevelStr[LL_ERROR + 1] = {
     " ERROR "
 };
 
-void *__logData = NULL;
-void (*__vlogFunc)(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp) = NULL;
+void     *__logData  = NULL;
+VLogFunc  __vlogFunc = NULL;
 
 void logger_log(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, ...) {
 #ifdef PARAM_CHECKS
@@ -113,4 +113,16 @@ void logger_vstream(void *data, enum LogLevel logLevel, const char* file, int li
     }
 
     fputc('\n', stream);
+}
+
+void logger_vprePost(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp) {
+    struct logger_prePostData *dt = data;
+    int res = dt->preFunc(dt, logLevel, file, line, func, format, argp);
+    if(res) {
+        return;
+    }
+
+    dt->loggerFunc(dt->loggerData, logLevel, file, line, func, format, argp);
+
+    (void)dt->preFunc(dt, logLevel, file, line, func, format, argp);
 }
