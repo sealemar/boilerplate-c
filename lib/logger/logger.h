@@ -101,9 +101,14 @@ struct logger_prePostData {
     } identifier;
 };
 
+struct logger_compositeData {
+    size_t  count;
+    struct logger_prePostData datas[];
+};
+
 void logger_vstream   (void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
 void logger_vprePost  (void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
-// void logger_vcomposite(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
+void logger_vcomposite(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
 
 #define logger_install(pdata, logger_func) { \
     __vlogFunc = logger_func; \

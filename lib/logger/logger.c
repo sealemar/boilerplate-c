@@ -117,12 +117,25 @@ void logger_vstream(void *data, enum LogLevel logLevel, const char* file, int li
 
 void logger_vprePost(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp) {
     struct logger_prePostData *dt = data;
-    int res = dt->preFunc(dt, logLevel, file, line, func, format, argp);
-    if(res) {
-        return;
+    if(dt->preFunc) {
+        int res = dt->preFunc(dt, logLevel, file, line, func, format, argp);
+        if(res) {
+            return;
+        }
     }
 
     dt->loggerFunc(dt->loggerData, logLevel, file, line, func, format, argp);
 
-    (void)dt->preFunc(dt, logLevel, file, line, func, format, argp);
+    if(dt->postFunc) {
+        (void)dt->postFunc(dt, logLevel, file, line, func, format, argp);
+    }
+}
+
+void logger_vcomposite(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp) {
+    struct logger_compositeData *dt = data;
+    struct logger_prePostData   *ld = dt->datas;
+
+    for(size_t i = 0; i < dt->count; ++i, ++ld) {
+        logger_vprePost(ld, logLevel, file, line, func, format, argp);
+    }
 }
