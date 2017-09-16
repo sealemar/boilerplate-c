@@ -34,23 +34,22 @@ test check:
 test-dbg check-dbg:
 	$(MAKE) -C test dbg
 
+define recipe
+    @for tp in project test lib ; do \
+        echo $(MAKE) -C $$tp $1 ; \
+        $(MAKE) -C $$tp $1 ; \
+    done
+endef
+
 ctags:
-	$(MAKE) -C project ctags
-	$(MAKE) -C test ctags
-	$(MAKE) -C lib ctags
+	$(call recipe,ctags)
 
 mostlyclean:
-	$(MAKE) -C project mostlyclean
-	$(MAKE) -C test mostlyclean
-	$(MAKE) -C lib mostlyclean
+	$(call recipe,mostlyclean)
 
 clean:
-	$(MAKE) -C project clean
-	$(MAKE) -C test clean
-	$(MAKE) -C lib clean
+	$(call recipe,clean)
 
 distclean:
-	$(MAKE) -C project distclean
-	$(MAKE) -C test distclean
-	$(MAKE) -C lib distclean
+	$(call recipe,distclean)
 	rm -f etc/*tags

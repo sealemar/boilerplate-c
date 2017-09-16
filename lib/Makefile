@@ -22,21 +22,24 @@ CTAGS_DIR      := ../lib
 
 ifndef MAKELIB
 
+define librecipe
+    @for libname in `find ../lib -type d -d 1 -exec basename '{}' \;` ; do \
+        echo $(MAKE) $1 DEBUG=$(DEBUG) MAKELIB=$${libname} ; \
+        $(MAKE) $1 DEBUG=$(DEBUG) MAKELIB=$${libname} ; \
+    done
+endef
+
 all:
-	$(MAKE) DEBUG=$(DEBUG) MAKELIB=logger
-	$(MAKE) DEBUG=$(DEBUG) MAKELIB=main
+	$(call librecipe)
 
 mostlyclean:
-	$(MAKE) mostlyclean MAKELIB=logger
-	$(MAKE) mostlyclean MAKELIB=main
+	$(call librecipe,mostlyclean)
 
 clean:
-	$(MAKE) clean MAKELIB=logger
-	$(MAKE) clean MAKELIB=main
+	$(call librecipe,clean)
 
 distclean:
-	$(MAKE) distclean MAKELIB=logger
-	$(MAKE) distclean MAKELIB=main
+	$(call librecipe,distclean)
 
 include ../include/Makefile.postinclude
 
