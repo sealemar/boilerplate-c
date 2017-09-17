@@ -29,7 +29,7 @@ extern const char* LogLevelStr[LL_ERROR + 1];
 typedef void (*VLogFunc)(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
 
 struct logger_prePostData;
-typedef int (*VLogFuncPrePost)(struct logger_prePostData *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
+typedef Bool (*VLogFuncPrePost)(struct logger_prePostData *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp);
 
 extern void     *__logData;
 extern VLogFunc  __vlogFunc;

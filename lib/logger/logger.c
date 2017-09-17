@@ -118,8 +118,8 @@ void logger_vstream(void *data, enum LogLevel logLevel, const char* file, int li
 void logger_vprePost(void *data, enum LogLevel logLevel, const char* file, int line, const char* func, const char *format, va_list argp) {
     struct logger_prePostData *dt = data;
     if(dt->preFunc) {
-        int res = dt->preFunc(dt, logLevel, file, line, func, format, argp);
-        if(res) {
+        Bool res = dt->preFunc(dt, logLevel, file, line, func, format, argp);
+        if(!res) {
             return;
         }
     }
